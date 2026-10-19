@@ -175,13 +175,20 @@ struct FetchRawMessageCommand<T: MessageIdentifier>: IMAPTaggedCommand {
     /// The message identifier to fetch
     let identifier: T
 
-    /// Custom timeout for this operation
-    var timeoutSeconds: Int { return 10 }
+    /// Default timeout; enough for typical mail on a typical line.
+    static var defaultTimeoutSeconds: Int { 10 }
+
+    /// Timeout for the whole command, from the write until the tagged response. The whole
+    /// message must arrive within it, so large messages on slow lines need more.
+    let timeoutSeconds: Int
 
     /// Initialize a new fetch raw message command
-    /// - Parameter identifier: The message identifier to fetch
-    init(identifier: T) {
+    /// - Parameters:
+    ///   - identifier: The message identifier to fetch
+    ///   - timeoutSeconds: Timeout for the whole transfer
+    init(identifier: T, timeoutSeconds: Int = Self.defaultTimeoutSeconds) {
         self.identifier = identifier
+        self.timeoutSeconds = timeoutSeconds
     }
 
     /// Convert to an IMAP tagged command

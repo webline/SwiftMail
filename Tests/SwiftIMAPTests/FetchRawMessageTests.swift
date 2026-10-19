@@ -2,6 +2,15 @@ import Foundation
 import Testing
 @testable import SwiftMail
 
+@Suite("Fetch Raw Message Command")
+struct FetchRawMessageCommandTests {
+    @Test("the timeout defaults to 10 seconds and can be raised for large messages")
+    func timeoutIsConfigurable() {
+        #expect(FetchRawMessageCommand(identifier: UID(1)).timeoutSeconds == 10)
+        #expect(FetchRawMessageCommand(identifier: UID(1), timeoutSeconds: 300).timeoutSeconds == 300)
+    }
+}
+
 #if os(macOS)
     @Suite("Fetch Raw Message", .serialized, .timeLimit(.minutes(1)))
     struct FetchRawMessageTests {
@@ -50,6 +59,9 @@ import Testing
                 let raw = try await server.fetchRawMessage(identifier: UID(1))
                 #expect(raw == sampleMessage)
                 #expect(String(data: raw, encoding: .utf8)?.contains("Received: from mx.example.com") == true)
+
+                let withTimeout = try await server.fetchRawMessage(identifier: UID(1), timeoutSeconds: 120)
+                #expect(withTimeout == sampleMessage)
 
                 try await server.disconnect()
             }

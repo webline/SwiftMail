@@ -139,6 +139,24 @@ extension IMAPServer {
     }
 
     /**
+     Fetches the complete raw RFC822 message with a timeout for the whole transfer.
+
+     The default of `fetchRawMessage(identifier:)` is 10 seconds for the entire message; a large
+     message on a slow line takes longer. Size the timeout from `RFC822.SIZE` if it is known.
+
+     - Parameters:
+       - identifier: The identifier of the message
+       - timeoutSeconds: Seconds from sending the command until the tagged response
+     - Returns: The complete raw message data
+     - Throws: `IMAPError.timeout` if the message does not arrive in time
+     */
+    public func fetchRawMessage<T: MessageIdentifier>(identifier: T, timeoutSeconds: Int) async throws -> Data {
+        precondition(timeoutSeconds > 0, "timeoutSeconds must be positive")
+        let command = FetchRawMessageCommand(identifier: identifier, timeoutSeconds: timeoutSeconds)
+        return try await executeCommand(command)
+    }
+
+    /**
      Fetch all message parts and their data for a message
      - Parameter identifier: The message identifier (UID or sequence number)
      - Returns: An array of message parts with their data populated

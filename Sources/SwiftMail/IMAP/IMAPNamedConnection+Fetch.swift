@@ -58,6 +58,14 @@ extension IMAPNamedConnection {
         return try await executeCommand(command)
     }
 
+    /// Fetch a full raw RFC822 message with a timeout for the whole transfer, for large
+    /// messages on slow lines.
+    public func fetchRawMessage<T: MessageIdentifier>(identifier: T, timeoutSeconds: Int) async throws -> Data {
+        precondition(timeoutSeconds > 0, "timeoutSeconds must be positive")
+        let command = FetchRawMessageCommand(identifier: identifier, timeoutSeconds: timeoutSeconds)
+        return try await executeCommand(command)
+    }
+
     /// Fetch message metadata for one identifier.
     /// - Parameters:
     ///   - identifier: The message identifier to fetch.
